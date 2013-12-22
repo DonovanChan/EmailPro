@@ -1,0 +1,384 @@
+#!/usr/bin/python
+
+"""Email.py: Sends text or HTML emails with optional attachments."""
+"""Intended for use with bBox plug-in, hence the odd variable declarations"""
+
+__version__     = "3.3.0"
+__author__      = "Donovan Chandler"
+__copyright__   = "Copyright 2013, Beezwax Datatools, Inc."
+__credits__     = ["Simon Brown", "unknown"]
+
+
+import email.Encoders as encoders
+from email.MIMEBase import MIMEBase
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.MIMEImage import MIMEImage
+from email.MIMEAudio import MIMEAudio
+
+import mimetypes
+import os
+import re
+import smtplib
+
+class Email:
+    """
+    Sends HTML email with optional attachments.
+    Compiled from various sources.
+    """
+    def __init__(self, smtpServer, smtpPort=25, hostname='', username='', password='', debugLevel=0):
+        """
+        Create a new empty email message object.
+
+        @param smtpServer: The address of the SMTP server
+        @param smtpPort: Optional. Defaults to 25. Common ports include 25, 587.
+        @param username: Optional.
+        @param password: Optional.
+        @param debugLevel: Optional. 0 for less info; 1 for more info (may cause some messages to fail compared to 0)
+
+        """
+        self._delimiters = ',\n\r' # delimit between multiple addresses and attachments
+        self._textBody = None
+        self._hostname = hostname
+        self._htmlBody = None
+        self._subject = ""
+        self._smtpServer = smtpServer
+        self._smtpPort = smtpPort
+        self._username = username
+        self._password = password
+        self._debugLevel = debugLevel
+        self._replyTo = None
+        # Don't bother with complex validation, because it won't cover everything
+        self._reEmail = re.compile("^[^@]+@[^@]+\.[^@]+$")
+        self.clearRecipients()
+        self.clearAttachments()
+
+    def send(self):
+        """
+        Send the email message represented by this object.
+        """
+        # Validate message
+        if self._textBody is None and self._htmlBody is None:
+            raise Exception("Error! Must specify at least one body type (HTML or Text)")
+        if len(self._to) == 0:
+            raise Exception("Must specify at least one recipient")
+
+        # Create the message part
+        if self._textBody is not None and self._htmlBody is None:
+            msg = MIMEText(self._textBody, "plain")
+        elif self._textBody is None and self._htmlBody is not None:
+            msg = MIMEText(self._htmlBody, "html")
+        else:
+            msg = MIMEMultipart("alternative")
+            msg.attach(MIMEText(self._textBody, "plain"))
+            msg.attach(MIMEText(self._htmlBody, "html"))
+
+        # Add attachments, if any
+        if len(self._attach) != 0:
+            tmpmsg = msg
+            msg = MIMEMultipart()
+            msg.attach(tmpmsg)
+        for fname, attachname in self._attach:
+            if not os.path.exists(fname):
+                raise Exception("File '{0}' does not exist.  Not attaching to email.".format(fname))
+                continue
+            if not os.path.isfile(fname):
+                raise Exception("Attachment '{0}' is not a file.  Not attaching to email.".format(fname))
+                continue
+            # Guess at encoding type
+            ctype, encoding = mimetypes.guess_type(fname)
+            if ctype is None or encoding is not None:
+                # No guess could be made so use a binary type.
+                ctype = 'application/octet-stream'
+            maintype, subtype = ctype.split('/', 1)
+            if maintype == 'text':
+                fp = open(fname)
+                attach = MIMEText(fp.read(), _subtype=subtype)
+                fp.close()
+            elif maintype == 'image':
+                fp = open(fname, 'rb')
+                attach = MIMEImage(fp.read(), _subtype=subtype)
+                fp.close()
+            elif maintype == 'audio':
+                fp = open(fname, 'rb')
+                attach = MIMEAudio(fp.read(), _subtype=subtype)
+                fp.close()
+            else:
+                fp = open(fname, 'rb')
+                attach = MIMEBase(maintype, subtype)
+                attach.set_payload(fp.read())
+                fp.close()
+                # Encode the payload using Base64
+                encoders.encode_base64(attach)
+            # Set the filename parameter
+            if attachname is None:
+                filename = os.path.basename(fname)
+            else:
+                filename = attachname
+            attach.add_header('Content-Disposition', 'attachment', filename=filename)
+            msg.attach(attach)
+
+        # Complete header
+        # This is where To, CC, BCC are differentiated
+        msg['Subject'] = self._subject
+        msg['From'] = self._from
+        msg['To'] = ", ".join(self._to)
+        msg['CC'] = ", ".join(self._cc)
+        msg['BCC'] = ", ".join(self._bcc)
+        if self._replyTo is not None:
+            msg['reply-to'] = self._replyTo
+        msg.preamble = "You need a MIME enabled mail reader to see this message"
+        msg = msg.as_string()
+        allRecipients = self._to + self._cc + self._bcc
+
+        # Send message
+        try:
+            server = smtplib.SMTP(self._smtpServer, self._smtpPort, self._hostname, 5)
+            server.set_debuglevel(self._debugLevel)
+            server.ehlo()
+            if self._username:
+                if server.has_extn('STARTTLS'):
+                    server.starttls()
+                else:
+                    server.quit()
+                    server = smtplib.SMTP_SSL(self._smtpServer, self._smtpPort, self._hostname)
+                    server.set_debuglevel(self._debugLevel)
+                server.ehlo() # re-identify ourselves over secure connection
+                server.login(self._username, self._password)
+
+            result = server.sendmail(self._from, allRecipients, msg)
+        except Exception, err:
+            raise err
+        finally:
+            try:
+                server.quit()
+            except Exception:
+                pass
+        return result
+
+    def setSubject(self, subject):
+        """
+        Set the subject of the email message.
+        """
+        self._subject = subject
+
+    def setFrom(self, address):
+        """
+        Set the email sender.
+        """
+        if not self.validateEmailAddress(address):
+            raise Exception("Invalid FROM email address '{0}'".format(address))
+        self._from = address
+
+    def clearRecipients(self):
+        """
+        Remove all currently defined recipients for
+        the email message.
+        """
+        self._to = []
+        self._cc = []
+        self._bcc = []
+
+    def addRecipient(self, address, type='TO'):
+        """
+        Add a new recipient to the email message.
+        """
+        if not self.validateEmailAddress(address):
+            raise Exception("Invalid {1} email address '{0}'".format(address, type))
+        if type == 'CC':
+            self._cc.append(address)
+        elif type == 'BCC':
+            self._bcc.append(address)
+        else:
+            self._to.append(address)
+
+    def addRecipients(self, addressList, type=None):
+        """
+        Add one or more reciepients to the email message.
+        """
+        for address in re.split('['+self._delimiters+']\s*', addressList.strip(self._delimiters)):
+            if type != None:
+                self.addRecipient(address, type)
+            else:
+                self.addRecipient(address)
+
+    def setTextBody(self, body):
+        """
+        Set the plain text body of the email message.
+        """
+        self._textBody = body
+
+    def setHtmlBody(self, body):
+        """
+        Set the HTML portion of the email message.
+        """
+        self._htmlBody = body
+
+    def setReplyTo(self, address):
+        """
+        Set Reply-To address.
+        """
+        if not self.validateEmailAddress(address):
+            raise Exception("Invalid REPLY-TO email address '{0}'".format(address))
+        else:
+            self._replyTo = address
+
+    def clearAttachments(self):
+        """
+        Remove all file attachments.
+        """
+        self._attach = []
+
+    def addAttachment(self, filepath, attachname=None):
+        """
+        Add a file attachment to this email message.
+
+        @param filepath: The full path and file name of the file
+                      to attach.
+        @type filepath: String
+        @param attachname: This will be the name of the file in
+                           the email message if set.  If not set
+                           then the filename will be taken from
+                           the filepath parameter above.
+        @type attachname: String
+        """
+        if filepath is None:
+            return
+        self._attach.append((filepath, attachname))
+
+    def addAttachments(self, filepathList):
+        """
+        Add one or more file attachments to the email message.
+        """
+        for thisFile in re.split('['+self._delimiters+']\s*', filepathList.strip(self._delimiters)):
+            self.addAttachment(thisFile)
+
+    def validateEmailAddress(self, address):
+        """
+        Validate the specified email address.
+
+        @return: True if valid, False otherwise
+        @rtype: Boolean
+        """
+        if self._reEmail.search(address) is None:
+            return False
+        return True
+
+
+# Enable for debugging
+# Remember to replace [at] strings
+if True:
+    # attachmentPath = "/Users/donovan/Desktop/pic.png\r/Users/donovan/Desktop/Import.log"
+    attachmentPath = ""
+    bccAddress = ""
+    bodyHTML = "The following should be <b>bold</b>\n<br>\n"
+    bodyText = "This is the plain text version"
+    ccAddress = "donovan_chandler[at]apple.com"
+    debugLevel = 1
+    fromAddress = "Some Guy <donovan.chandler[at]gmail.com>"
+    hostname = "beezwax.net"
+    replyAddress = "donovan_c[at]beezwax.net"
+    subject = "TEST bBox HTML Email"
+    toAddress = "donovan_c[at]beezwax.net, donovan.chandler[at]gmail.com"
+    ## Server settings - SSL
+    # emailServer = "mail.beezwax.net"
+    # smtpPort = 587
+    # username = "donovan_c[at]beezwax.net"
+    # password = "__FILL_ME_IN__"
+    ## Server settings - TLS
+    emailServer = "smtp.gmail.com"
+    smtpPort = 587
+    username = "donovan.chandler[at]gmail.com"
+    password = "__FILL_ME_IN__"
+    ## Server settings - open relay
+    # emailServer = "relay.apple.com"
+    # smtpPort = 25
+    # username = ""
+    # password = ""
+
+
+# Localize parameters instantiated by bBox
+mFrom = fromAddress
+mPort = smtpPort
+mServer = emailServer
+mSubject = subject
+mTo = toAddress
+
+try:
+    mBodyHTML = bodyHTML
+except Exception, e:
+    mBodyHTML = ''
+
+try:
+    mBodyText = bodyText
+except Exception, e:
+    mBodyText = ''
+
+if mBodyHTML == '' and mBodyText == '':
+    raise Exception("bodyHTML or bodyText must be declared for message body.")
+
+try:
+    mBCC = bccAddress
+except Exception, e:
+    mBCC = ''
+
+try:
+    mCC = ccAddress
+except Exception, e:
+    mCC = ''
+
+try:
+    mReplyTo = replyAddress
+except Exception, e:
+    mReplyTo = ''
+
+try:
+    mFile = attachmentPath
+except Exception, e:
+    mFile = ''
+
+try:
+    mPassword = password
+except Exception, e:
+    mPassword = ''
+
+try:
+    mUsername = username
+except Exception, e:
+    mUsername = ''
+
+try:
+    mHostname = hostname
+except Exception, e:
+    mHostname = ''
+
+try:
+    mDebugLevel = debugLevel
+except Exception, e:
+    mDebugLevel = 0
+
+
+try:
+    # Create and send message
+    m = Email(mServer, mPort, mHostname, mUsername, mPassword, mDebugLevel)
+    m.setFrom(mFrom)
+    m.addRecipients(mTo)
+    if mCC:
+        m.addRecipients(mCC, 'CC')
+    if mBCC:
+        m.addRecipients(mBCC, 'BCC')
+    if mReplyTo:
+        m.setReplyTo(mReplyTo)
+    m.setSubject(mSubject)
+    # Set HTML text last, so that it's preferred, if present
+    # According to RFC 2046, the last part of a multipart message preferred
+    if mBodyText:
+        m.setTextBody(mBodyText)
+    if mBodyHTML:
+        m.setHtmlBody(mBodyHTML)
+    if mFile:
+        m.addAttachments(mFile)
+    print m.send()
+
+except Exception, err:
+    print str(err)
