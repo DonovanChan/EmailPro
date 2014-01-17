@@ -3,7 +3,7 @@
 """Email.py: Sends text or HTML emails with optional attachments."""
 """Intended for use with bBox plug-in, hence the odd variable declarations"""
 
-__version__     = "3.3.0"
+__version__     = "3.4.0"
 __author__      = "Donovan Chandler"
 __copyright__   = "Copyright 2013, Beezwax Datatools, Inc."
 __credits__     = ["Simon Brown", "unknown"]
@@ -21,6 +21,7 @@ import os
 import re
 import smtplib
 
+
 class Email:
     """
     Sends HTML email with optional attachments.
@@ -37,7 +38,7 @@ class Email:
         @param debugLevel: Optional. 0 for less info; 1 for more info (may cause some messages to fail compared to 0)
 
         """
-        self._delimiters = ',\n\r' # delimit between multiple addresses and attachments
+        self._delimiters = ',\n\r'  # delimit between multiple addresses and attachments
         self._textBody = None
         self._hostname = hostname
         self._htmlBody = None
@@ -143,7 +144,7 @@ class Email:
                     server.quit()
                     server = smtplib.SMTP_SSL(self._smtpServer, self._smtpPort, self._hostname)
                     server.set_debuglevel(self._debugLevel)
-                server.ehlo() # re-identify ourselves over secure connection
+                server.ehlo()  # re-identify ourselves over secure connection
                 server.login(self._username, self._password)
 
             result = server.sendmail(self._from, allRecipients, msg)
@@ -196,8 +197,8 @@ class Email:
         """
         Add one or more reciepients to the email message.
         """
-        for address in re.split('['+self._delimiters+']\s*', addressList.strip(self._delimiters)):
-            if type != None:
+        for address in re.split('[' + self._delimiters + ']\s*', addressList.strip(self._delimiters)):
+            if type is not None:
                 self.addRecipient(address, type)
             else:
                 self.addRecipient(address)
@@ -250,7 +251,7 @@ class Email:
         """
         Add one or more file attachments to the email message.
         """
-        for thisFile in re.split('['+self._delimiters+']\s*', filepathList.strip(self._delimiters)):
+        for thisFile in re.split('[' + self._delimiters + ']\s*', filepathList.strip(self._delimiters)):
             self.addAttachment(thisFile)
 
     def validateEmailAddress(self, address):
@@ -291,26 +292,26 @@ if True:
     username = "donovan.chandler[at]gmail.com"
     password = "__FILL_ME_IN__"
     ## Server settings - open relay
-    # emailServer = "relay.apple.com"
+    # emailServer = "__FILL_ME_IN__"
     # smtpPort = 25
     # username = ""
     # password = ""
 
 
 # Localize parameters instantiated by bBox
-mFrom = fromAddress
+mFrom = fromAddress.encode('utf-8')
 mPort = smtpPort
 mServer = emailServer
-mSubject = subject
-mTo = toAddress
+mSubject = subject.encode('utf-8')
+mTo = toAddress.encode('utf-8')
 
 try:
-    mBodyHTML = bodyHTML
+    mBodyHTML = bodyHTML.encode('utf-8')
 except Exception, e:
     mBodyHTML = ''
 
 try:
-    mBodyText = bodyText
+    mBodyText = bodyText.encode('utf-8')
 except Exception, e:
     mBodyText = ''
 
@@ -318,32 +319,32 @@ if mBodyHTML == '' and mBodyText == '':
     raise Exception("bodyHTML or bodyText must be declared for message body.")
 
 try:
-    mBCC = bccAddress
+    mBCC = bccAddress.encode('utf-8')
 except Exception, e:
     mBCC = ''
 
 try:
-    mCC = ccAddress
+    mCC = ccAddress.encode('utf-8')
 except Exception, e:
     mCC = ''
 
 try:
-    mReplyTo = replyAddress
+    mReplyTo = replyAddress.encode('utf-8')
 except Exception, e:
     mReplyTo = ''
 
 try:
-    mFile = attachmentPath
+    mFile = attachmentPath.encode('utf-8')
 except Exception, e:
     mFile = ''
 
 try:
-    mPassword = password
+    mPassword = password.encode('utf-8')
 except Exception, e:
     mPassword = ''
 
 try:
-    mUsername = username
+    mUsername = username.encode('utf-8')
 except Exception, e:
     mUsername = ''
 

@@ -30,3 +30,8 @@ Just find a place to store the plug-in file in your solution, import the module 
 ## Download and Installation
 
 There should be a "Download ZIP" button on the [GitHub page](https://github.com/DonovanChan/EmailPro). Press that and open the EmailPro.fmp12 file. Its README script contains installation instructions.
+
+## Contact
+
+Donovan Chandler  
+donovan_c@beezwax.net
