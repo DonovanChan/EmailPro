@@ -1,3 +1,7 @@
+1.2.1 / 2014-01-18
+==================
+- Changed: clear configuration settings
+
 1.2.0 / 2014-01-17
 ==================
 - Enhanced: support extended ascii characters (anything over 127)
