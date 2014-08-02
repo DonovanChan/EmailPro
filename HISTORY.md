@@ -1,3 +1,9 @@
+1.3.0 / 2014-01-29
+==================
+- Enhanced: testing mode more configurable, includes optional warning dialog
+- Changed: use dedicated test email account
+- Fixed: bug where default settings weren't respected
+
 1.2.1 / 2014-01-18
 ==================
 - Changed: clear configuration settings

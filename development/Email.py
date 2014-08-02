@@ -269,18 +269,18 @@ class Email:
 # Enable for debugging
 # Remember to replace [at] strings
 if True:
-    # attachmentPath = "/Users/donovan/Desktop/pic.png\r/Users/donovan/Desktop/Import.log"
     attachmentPath = ""
+    attachmentPath = os.path.abspath(os.path.join(__file__, os.pardir)) + "/_tests/cats_are_evil.gif"
     bccAddress = ""
     bodyHTML = "The following should be <b>bold</b>\n<br>\n"
     bodyText = "This is the plain text version"
-    ccAddress = "donovan_chandler[at]apple.com"
+    ccAddress = "EmailProTesting@gmail.com"
     debugLevel = 1
-    fromAddress = "Some Guy <donovan.chandler[at]gmail.com>"
+    fromAddress = "Test Account <EmailProTesting@gmail.com>"
     hostname = "beezwax.net"
-    replyAddress = "donovan_c[at]beezwax.net"
+    replyAddress = "EmailProTesting@gmail.com"
     subject = "TEST bBox HTML Email"
-    toAddress = "donovan_c[at]beezwax.net, donovan.chandler[at]gmail.com"
+    toAddress = "EmailProTesting@gmail.com, EmailProTesting@gmail.com"
     ## Server settings - SSL
     # emailServer = "mail.beezwax.net"
     # smtpPort = 587
@@ -289,8 +289,8 @@ if True:
     ## Server settings - TLS
     emailServer = "smtp.gmail.com"
     smtpPort = 587
-    username = "donovan.chandler[at]gmail.com"
-    password = "__FILL_ME_IN__"
+    username = "EmailProTesting"
+    password = "jmuuN34TBvTzCF"
     ## Server settings - open relay
     # emailServer = "__FILL_ME_IN__"
     # smtpPort = 25

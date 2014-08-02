@@ -1,5 +1,5 @@
-# Exclude directories in root beginning with underscore
-/_*/
+# Exclude all directories beginning with underscore
+**/_*/
 
 # Exclude development file with test configurations set up
 EmailPro_DEV.fmp12
