@@ -17,15 +17,17 @@ There are some great email plug-ins out there, but sometimes I don’t think my 
 
 ## Usage
 
-Just call the “. emailPro . send” script. It takes Let-formatted variables as its prameters. If you prefer to use a different parameter format, please see the [ParamConverter](http://www.modularfilemaker.org/2013/11/paramconverter/) module for an easy bridge between formats.
+Just call the “. emailPro . send” script. It takes its parameters in [Let format](http://www.modularfilemaker.org/documentation/#Passing_Parameters). If you prefer to use a different parameter format, please see the [ParamConverter](http://www.modularfilemaker.org/2013/11/paramconverter/) module for an easy bridge between formats.
+
+See the README script for more information on testing and customizing your implementation.
 
 ## Requirements
 
-- [bBox plugin](http://www.beezwax.net/bbox) (Free)
+- [bBox plug-in](http://www.beezwax.net/bbox) (Free)
 - Mac OS clients only! (Sorry. bBox is only compatible with OS X. Let me know if you’d like to talk about adding compatibility for some other plug-in.)
 Installation
 
-Just find a place to store the plug-in file in your solution, import the module scripts, and cusotmize the Configuration and Settings scripts.
+Just find a place to store the plug-in file in your solution, import the module scripts, and customize the Configuration and Settings scripts.
 
 ## Download and Installation
 

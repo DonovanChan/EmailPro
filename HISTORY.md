@@ -1,3 +1,9 @@
+1.4.0 / 2014-08-12
+==================
+- Changed: Add defaults for $_from and $_reply_to
+- Changed: Test mode only changes explicitly overridden values
+- Improved: Module respects original error capture state
+
 1.3.0 / 2014-01-29
 ==================
 - Enhanced: testing mode more configurable, includes optional warning dialog
