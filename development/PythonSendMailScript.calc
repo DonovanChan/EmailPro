@@ -20,14 +20,16 @@ PARAMETERS:
 		password
 		debugLevel
 HISTORY:
-	Created:	2013-10-25 12:36 PT - Donovan Chandler
-	Modified:	2013-11-19 17:06 PT - Donovan Chandler : optional text body and debug level.
-	Modified:	2013-12-10 10:21 PT - Donovan Chandler : (3.02) fix attachments; add reply-to option.
-	Modified:	2013-12-11 16:25 PT - Donovan Chandler : (3.2.1) error specifies which address is invalid (TO, CC, etc)
-	Modified:	2013-12-14 12:49 PT - Donovan Chandler : (3.2.2) loosen validation on email address
-	Modified:	2013-12-16 17:42 PT - Donovan Chandler : (3.2.3) strip trailing delimiters
-	Modified:	2013-12-20 21:01 PT - Donovan Chandler : (3.3.0) include plain text alternative; add hostname parameter; use TLS by default for authentication; don't prefix errors
-	Modified:	2014-01-16 13:34 PT - Donovan Chandler : (3.4.0) support extended ascii characters
+	2013-10-25 12:36 PDT - Donovan Chandler
+	2013-11-19 17:06 PDT - Donovan Chandler : optional text body and debug level.
+	2013-12-10 10:21 PST - Donovan Chandler : (3.02) fix attachments; add reply-to option.
+	2013-12-11 16:25 PST - Donovan Chandler : (3.2.1) error specifies which address is invalid (TO, CC, etc)
+	2013-12-14 12:49 PST - Donovan Chandler : (3.2.2) loosen validation on email address
+	2013-12-16 17:42 PST - Donovan Chandler : (3.2.3) strip trailing delimiters
+	2013-12-20 21:01 PST - Donovan Chandler : (3.3.0) include plain text alternative; add hostname parameter; use TLS by default for authentication; don't prefix errors
+	2014-01-16 13:34 PST - Donovan Chandler : (3.4.0) support extended ascii characters
+	2014-08-13 11:30 PDT - Donovan Chandler : (3.5.0) no longer split on commas (allowing for commas in file names)
+
 __________________________________________________ */
 
 "#!/usr/bin/python" & ¶ &
@@ -35,7 +37,7 @@ __________________________________________________ */
 "\"\"\"Email.py: Sends text or HTML emails with optional attachments.\"\"\"" & ¶ &
 "\"\"\"Intended for use with bBox plug-in, hence the odd variable declarations\"\"\"" & ¶ &
 "" & ¶ &
-"__version__     = \"3.4.0\"" & ¶ &
+"__version__     = \"3.5.0\"" & ¶ &
 "__author__      = \"Donovan Chandler\"" & ¶ &
 "__copyright__   = \"Copyright 2013, Beezwax Datatools, Inc.\"" & ¶ &
 "__credits__     = [\"Simon Brown\", \"unknown\"]" & ¶ &
@@ -70,7 +72,8 @@ __________________________________________________ */
 "        @param debugLevel: Optional. 0 for less info; 1 for more info (may cause some messages to fail compared to 0)" & ¶ &
 "" & ¶ &
 "        \"\"\"" & ¶ &
-"        self._delimiters = ',\\n\\r'  # delimit between multiple addresses and attachments" & ¶ &
+"        self._addressDelimiters = ',\n\r'  # characters that split multiple addresses" & ¶ &
+"        self._attachmentDelimiters = '\n\r'  # characters that split attachment paths" & ¶ &
 "        self._textBody = None" & ¶ &
 "        self._hostname = hostname" & ¶ &
 "        self._htmlBody = None" & ¶ &
@@ -82,7 +85,7 @@ __________________________________________________ */
 "        self._debugLevel = debugLevel" & ¶ &
 "        self._replyTo = None" & ¶ &
 "        # Don't bother with complex validation, because it won't cover everything" & ¶ &
-"        self._reEmail = re.compile(\"^[^@]+@[^@]+\\.[^@]+$\")" & ¶ &
+"        self._reEmail = re.compile(\"^[^@]+@[^@]+\.[^@]+$\")" & ¶ &
 "        self.clearRecipients()" & ¶ &
 "        self.clearAttachments()" & ¶ &
 "" & ¶ &
@@ -229,7 +232,7 @@ __________________________________________________ */
 "        \"\"\"" & ¶ &
 "        Add one or more reciepients to the email message." & ¶ &
 "        \"\"\"" & ¶ &
-"        for address in re.split('[' + self._delimiters + ']\\s*', addressList.strip(self._delimiters)):" & ¶ &
+"        for address in re.split('[' + self._addressDelimiters + ']\s*', addressList.strip(self._addressDelimiters)):" & ¶ &
 "            if type is not None:" & ¶ &
 "                self.addRecipient(address, type)" & ¶ &
 "            else:" & ¶ &
@@ -283,7 +286,7 @@ __________________________________________________ */
 "        \"\"\"" & ¶ &
 "        Add one or more file attachments to the email message." & ¶ &
 "        \"\"\"" & ¶ &
-"        for thisFile in re.split('[' + self._delimiters + ']\\s*', filepathList.strip(self._delimiters)):" & ¶ &
+"        for thisFile in re.split('[' + self._attachmentDelimiters + ']\s*', filepathList.strip(self._attachmentDelimiters)):" & ¶ &
 "            self.addAttachment(thisFile)" & ¶ &
 "" & ¶ &
 "    def validateEmailAddress(self, address):" & ¶ &
@@ -296,7 +299,6 @@ __________________________________________________ */
 "        if self._reEmail.search(address) is None:" & ¶ &
 "            return False" & ¶ &
 "        return True" & ¶ &
-"" & ¶ &
 "" & ¶ &
 "# Localize parameters instantiated by bBox" & ¶ &
 "mFrom = fromAddress.encode('utf-8')" & ¶ &

@@ -1,3 +1,8 @@
+1.5.0 / 2014-08-14
+==================
+- Added: Script to send email from server
+- Changed: Allow commas in file paths
+
 1.4.0 / 2014-08-12
 ==================
 - Changed: Add defaults for $_from and $_reply_to

@@ -3,7 +3,7 @@
 """Email.py: Sends text or HTML emails with optional attachments."""
 """Intended for use with bBox plug-in, hence the odd variable declarations"""
 
-__version__     = "3.4.0"
+__version__     = "3.5.0"
 __author__      = "Donovan Chandler"
 __copyright__   = "Copyright 2013, Beezwax Datatools, Inc."
 __credits__     = ["Simon Brown", "unknown"]
@@ -38,7 +38,8 @@ class Email:
         @param debugLevel: Optional. 0 for less info; 1 for more info (may cause some messages to fail compared to 0)
 
         """
-        self._delimiters = ',\n\r'  # delimit between multiple addresses and attachments
+        self._addressDelimiters = ',\n\r'  # characters that split multiple addresses
+        self._attachmentDelimiters = '\n\r'  # characters that split attachment paths
         self._textBody = None
         self._hostname = hostname
         self._htmlBody = None
@@ -197,7 +198,7 @@ class Email:
         """
         Add one or more reciepients to the email message.
         """
-        for address in re.split('[' + self._delimiters + ']\s*', addressList.strip(self._delimiters)):
+        for address in re.split('[' + self._addressDelimiters + ']\s*', addressList.strip(self._addressDelimiters)):
             if type is not None:
                 self.addRecipient(address, type)
             else:
@@ -251,7 +252,7 @@ class Email:
         """
         Add one or more file attachments to the email message.
         """
-        for thisFile in re.split('[' + self._delimiters + ']\s*', filepathList.strip(self._delimiters)):
+        for thisFile in re.split('[' + self._attachmentDelimiters + ']\s*', filepathList.strip(self._attachmentDelimiters)):
             self.addAttachment(thisFile)
 
     def validateEmailAddress(self, address):
