@@ -1,36 +1,41 @@
+1.6.0 / 2014-08-26
+==================
+- Improved:  configure plug-in installation easier
+- Fixed:  include message subject when executing test
+
 1.5.0 / 2014-08-14
 ==================
-- Added: Script to send email from server
-- Changed: Allow commas in file paths
+- Added:  script to send email from server
+- Changed:  allow commas in file paths
 
 1.4.0 / 2014-08-12
 ==================
-- Changed: Add defaults for $_from and $_reply_to
-- Changed: Test mode only changes explicitly overridden values
-- Improved: Module respects original error capture state
+- Changed:  add defaults for $_from and $_reply_to
+- Changed:  test mode only changes explicitly overridden values
+- Improved:  module respects original error capture state
 
 1.3.0 / 2014-01-29
 ==================
-- Enhanced: testing mode more configurable, includes optional warning dialog
-- Changed: use dedicated test email account
-- Fixed: bug where default settings weren't respected
+- Enhanced:  testing mode more configurable, includes optional warning dialog
+- Changed:  use dedicated test email account
+- Fixed:  bug where default settings weren't respected
 
 1.2.1 / 2014-01-18
 ==================
-- Changed: clear configuration settings
+- Changed:  clear configuration settings
 
 1.2.0 / 2014-01-17
 ==================
-- Enhanced: support extended ascii characters (anything over 127)
+- Enhanced:  support extended ascii characters (anything over 127)
 
 1.1.3 / 2014-01-07
 ==================
-- Changed: fork Navigation module, now at v1.0.4
-- Changed: rename Navigation table to Solution
+- Changed:  fork Navigation module, now at v1.0.4
+- Changed:  rename Navigation table to Solution
 
 1.1.2 / 2014-01-03
 ==================
-- Fixed: bug validating navigation to plug-in layout when installing plug-in
+- Fixed:  bug validating navigation to plug-in layout when installing plug-in
 
 1.1.1 / 2013-12-24
 ==================
