@@ -24,8 +24,9 @@ See the README script for more information on testing and customizing your imple
 ## Requirements
 
 - [bBox plug-in](http://www.beezwax.net/bbox) (Free)
-- Mac OS clients only! (Sorry. bBox is only compatible with OS X. Let me know if you’d like to talk about adding compatibility for some other plug-in.)
-Installation
+- Mac OS clients only! (Sorry. bBox is only compatible with OS X. I have no plans to add support for Windows. If you can find a plug-in to execute Python scripts, you might be able to make it work.)
+
+## Installation
 
 Just find a place to store the plug-in file in your solution, import the module scripts, and customize the Configuration and Settings scripts.
 
@@ -36,4 +37,4 @@ There should be a "Download ZIP" button on the [GitHub page](https://github.com/
 ## Contact
 
 Donovan Chandler  
-donovan_c@beezwax.net
+donovan.chandler@gmail.com
